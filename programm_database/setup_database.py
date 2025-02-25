@@ -1,7 +1,6 @@
-import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base  # Importiere die Basis-Klasse und Modelle aus deiner models.py
+from programm_database.models import Base, User, Movie, Director, UserToMovie
 
 
 
@@ -23,8 +22,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_db():
     session = SessionLocal()
     try:
-        # Beispiel: Initiale Daten einfügen (optional)
-        from models import Director, Movie, User, UserToMovie
 
         # Einen Regisseur hinzufügen
         director = Director(first_name="Steven", last_name="Spielberg")
@@ -33,14 +30,24 @@ def init_db():
         # Einen Film hinzufügen
         movie = Movie(title="Jurassic Park", release_date=1993, director=director)
         session.add(movie)
+        session.commit()
+
+        print(f"Überprüfung das movie.id nicht 'None' ist: movie.id: {movie.id}")
 
         # Einen Benutzer hinzufügen
         user = User(name="Alice")
         session.add(user)
+        session.commit()
+
+        print(f"Überprüfung das user.id nicht 'None' ist: user.id: {user.id}")
 
         # Beziehung zwischen Benutzer und Film hinzufügen
-        user_to_movie = UserToMovie(user=user, movie=movie, rating=9.5)
+        user_to_movie = UserToMovie(user_id=user.id, movie_id=movie.id, rating=9.5)
         session.add(user_to_movie)
+        session.commit()
+
+        print(f"Überprüfung das ForeignKeys korrekt verbunden wurden: user_id: {user_to_movie.user_id} movie_id: {user_to_movie.movie_id}")
+
 
         # Änderungen speichern
         session.commit()
