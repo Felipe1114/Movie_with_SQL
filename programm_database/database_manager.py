@@ -5,8 +5,6 @@ from sqlalchemy.orm import Session
 from programm_database.models import User, Movie, Director, UserToMovie
 
 
-#TODO add director einbauen
-#TODO delete direcotr einbauen
 
 class DatabaseManager:
   def __init__(self, db: Session):
@@ -246,3 +244,72 @@ class DatabaseManager:
     except Exception:
       print(f"Fehler beim hinzufügen des directors {director_first_name} {director_last_name}, in die datenbank.")
 
+
+  def get_director(self, director_id: int):
+    """
+    gibt den director auf basis seiner ID zurück
+    """
+    try:
+      existing_director = self.db.query(Director).filter(Director.id == director_id).one_or_none()
+
+      if existing_director:
+        return existing_director
+
+      else:
+        print(f"Es existiert kein Director mit der id: {director_id}")
+        return None
+
+    except Exception:
+      print(f"Es gab einen Fehler beim zugriff auf die datenbank")
+
+
+  def delete_director(self, director_id: int):
+    """
+    Entfernt einen director aus der Datenbank, auf basis seiner ID
+    """
+    try:
+      existing_director = self.db.query(Director).filter(Director.id == director_id).one_or_none()
+
+
+      if existing_director:
+        connected_movies = self.db.query(Movie).filter(Movie.director_id == director_id).all()
+
+        if connected_movies:
+          for movie in connected_movies:
+
+            # alle verbindungen zu 'movie'
+            to_movie_connected_data = self.db.query(UserToMovie).filter(UserToMovie.movie_id == movie.id).all()
+
+            # existieren verbindungen zu diesem film
+            if to_movie_connected_data:
+
+              # alle daten, die mit den zu löschenden filmen verbunden sind, löschen
+              for data in to_movie_connected_data:
+                self.db.delete(data)
+                self.db.commit()
+
+                print(f"die Zeile {data.user_id}, {data.movie_id}, wurde gelöscht")
+
+          # alle film verbindungen wurden gelöscht, jetzt werden alle filme gelöscht
+          for movie in connected_movies:
+            self.db.delete(movie)
+            self.db.commit()
+
+            print(f"Der Film: {movie.title}, Director: {movie.director}, Rating: {movie.rating}, ID: {movie.id}, wurde gelöscht")
+
+
+        else:
+          print(f"Es existieren keine Filme mehr, mit dem director '{existing_director.first_name} {existing_director.last_name}'")
+
+        # alle filme mit dem director wurden gelöscht, jetzt wird der director gelöscht
+        self.db.delete(existing_director)
+        self.db.commit()
+
+        print(f"Der Director: '{existing_director.first_name} {existing_director.last_name}' ID: {existing_director.id}, wurde gelöscht")
+
+
+      else:
+        print(f"Es existiert kein director mit der ID: {director_id}")
+
+    except Exception:
+      print(f"Fehler beim löschen des Directors mit der ID: {director_id}")
