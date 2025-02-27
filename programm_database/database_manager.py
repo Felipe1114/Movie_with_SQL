@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from programm_database.models import User, Movie, Director, UserToMovie
 
 
-# TODO: wenn zeit, dann self.db.query() in extra funktion modularisieren -> eigene class dafür bauen?
+#  wenn zeit, dann self.db.query() in extra funktion modularisieren -> eigene class dafür bauen?
 #  z.b: def get_user_by_name(self, user_name: str): -> so aufbauen, dass der rodner auch modular ist
 #     return self.db.query(User).filter(User.name == user_name).first()
 
@@ -110,7 +110,7 @@ class DatabaseManager:
     except Exception:
       print("Fehler beim auflisten der User")
 
-# TODO diese methode ansehen, ob sie stimmt
+
   def list_movies_for_user(self, user_id: int):
     """
     Listet alle Filme eines Nutzers basierend auf der user_id.
@@ -203,6 +203,7 @@ class DatabaseManager:
 
       self.db.delete(user_to_movie_entry)
       self.db.commit()
+      # hier könnte man den print noch mla genauer machen, in dem anch den use rund mvoie name hinschreibt
       print(f"Verbindung zwischen Nutzer {user_id} und Film {movie_id} wurde gelöscht.")
 
       remaining_connections = (
@@ -225,7 +226,6 @@ class DatabaseManager:
       self.db.rollback()
       return False
 
-  # TODO metode überprüfen
   def update_movie_rating(self, user_id: int, movie_id: int, new_rating: float):
     """
     Aktualisiert das Rating eines Films für einen bestimmten Nutzer in der Tabelle user_to_movie.
@@ -238,7 +238,7 @@ class DatabaseManager:
       )
 
       if not user_to_movie_entry:
-        print(f"Keine Bewertung für Nutzer {user_id} und Film {movie_id} gefunden.")
+        print(f"Keine verbindung von Nutzer {user_id} und Film {movie_id} gefunden.")
         return False
 
       user_to_movie_entry.rating = new_rating
