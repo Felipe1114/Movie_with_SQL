@@ -1,10 +1,11 @@
-from quopri import ESCAPE
-
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from programm_database.models import User, Movie, Director, UserToMovie
 
 
+# TODO: wenn zeit, dann self.db.query() in extra funktion modularisieren -> eigene class dafür bauen?
+#  z.b: def get_user_by_name(self, user_name: str): -> so aufbauen, dass der rodner auch modular ist
+#     return self.db.query(User).filter(User.name == user_name).first()
 
 class DatabaseManager:
   def __init__(self, db: Session):
@@ -14,21 +15,37 @@ class DatabaseManager:
     """
     self.db = db
 
+    print(f"DatabaseManager wurde als {self.__class__.__name__} instanziert")
+
+  def get_user(self, user_id: int):
+    try:
+      existing_user = self.db.query(User).filter(User.id == user_id).one()
+
+      return existing_user
+
+    except NoResultFound as e:
+      print(f"Kein User mit der ID: {user_id} gefunden: {e}")
+
+    except Exception:
+      print(f"Fehler beim zugriff auf User mit der ID: {user_id}")
+
+
   def get_user_id(self, user_name: str):
     """
     gibt die user_id eines bestimmten users zurück
     """
     try:
-      user_id = (
-        self.db.query(User.name).
+      user = (
+        self.db.query(User).
         filter(User.name == user_name).
         first()
       )
 
-      if not user_id:
+      if not user:
         print(f"keinen nutzer mit dem namen: {user_name} gefunden")
 
-      return user_id
+      # gibt user.id zurück, falls user existiert. Ansonsten wird None returned
+      return user.id if user else None
 
     except Exception:
       print("Fehler beim abrufen der user_id")
@@ -42,7 +59,7 @@ class DatabaseManager:
       existing_user = self.db.query(User.name).filter(User.name == user_name).first()
 
       if not existing_user:
-        new_user = User(user_name=user_name)
+        new_user = User(name=user_name)
         self.db.add(new_user)
         self.db.commit()
         self.db.refresh(new_user) # jetzt hat new_user auch eine id
@@ -66,10 +83,8 @@ class DatabaseManager:
       removable_user = self.db.query(User).filter(User.id == user_id).one()
 
       if removable_user:
-        user_related_data = self.db.query(UserToMovie).filter(UserToMovie.user_id == user_id).all()
-
-        for entry in user_related_data:
-          self.db.delete(entry)
+        # löscht alle verbundenen daten zu 'user' aus der datenbank
+        self.db.query(UserToMovie).filter(UserToMovie.user_id == user_id).delete()
 
         self.db.commit()
 
@@ -87,14 +102,23 @@ class DatabaseManager:
       self.db.rollback()
 
 
+  def list_user(self):
+    try:
+      all_user = self.db.query(User).all()
+      return all_user
+
+    except Exception:
+      print("Fehler beim auflisten der User")
+
+# TODO diese methode ansehen, ob sie stimmt
   def list_movies_for_user(self, user_id: int):
     """
     Listet alle Filme eines Nutzers basierend auf der user_id.
     """
     try:
       user_movies = (
-        self.db.query(Movie.title, Movie.release_date, UserToMovie.rating)
-        .join(UserToMovie, Movie.id == UserToMovie.movie_id)
+        self.db.query(Movie.title, Movie.release_date, UserToMovie.rating, Director.first_name, Director.last_name)
+        .join(UserToMovie, Movie.id == UserToMovie.movie_id).join(Director, Movie.director_id == Director.id)
         .filter(UserToMovie.user_id == user_id)
         .all()
       )
@@ -103,15 +127,16 @@ class DatabaseManager:
         print(f"Keine Filme für Nutzer mit ID {user_id} gefunden.")
         return []
 
-      #TODO muss etwas geprintet werden?
-      for movie in user_movies:
-        print(f"Film: {movie.title}, Erscheinungsjahr: {movie.release_date}, Bewertung: {movie.rating}")
+      for index, movie in enumerate(user_movies):
+        print("Folgende Filme wurden gefunden:")
+        print(f"\t{index + 1}. Film: {movie.title}, Erscheinungsjahr: {movie.release_date}, Bewertung: {movie.rating}")
 
       return user_movies
 
     except Exception as e:
       print(f"Fehler beim Abrufen der Filme für Nutzer {user_id}: {e}")
       return []
+
 
   def add_movie_for_user(self, user_id: int, movie_title: str, release_date: int, director_first_name: str, director_last_name: str, rating: float):
     """
@@ -124,6 +149,9 @@ class DatabaseManager:
       # wenn der director noch nicht existiert
       if not existing_director:
         new_director = self.add_director(director_first_name, director_last_name)
+
+        if not new_director:
+          raise ValueError
 
       else:
         new_director = existing_director
@@ -148,10 +176,13 @@ class DatabaseManager:
 
       print(f"Film '{new_movie.title}' wurde dem Nutzer mit ID {user_id} hinzugefügt.")
 
+    except ValueError as e:
+      print(f"Director konnte nicht hinzugefügt werden: {e}")
 
     except Exception as e:
       print(f"Fehler beim Hinzufügen des Films für Nutzer {user_id}: {e}")
       self.db.rollback()
+
 
   # TODO metode überprüfen
   def delete_movie_for_user(self, user_id: int, movie_id: int):
@@ -263,6 +294,21 @@ class DatabaseManager:
       print(f"Es gab einen Fehler beim zugriff auf die datenbank")
 
 
+  def list_up_directors(self):
+    try:
+      directors = self.db.query(Director).all()
+
+      if not directors:
+        print(f"Keine Directoren in der Datenbank")
+        return
+
+      else:
+        return directors
+
+    except Exception:
+      print("Fehler beim zugriff auf Directoren")
+
+
   def delete_director(self, director_id: int):
     """
     Entfernt einen director aus der Datenbank, auf basis seiner ID
@@ -270,46 +316,41 @@ class DatabaseManager:
     try:
       existing_director = self.db.query(Director).filter(Director.id == director_id).one_or_none()
 
+      if not existing_director:
+        print(f"Es gibt keinen director mit dieser ID: {director_id}")
 
-      if existing_director:
-        connected_movies = self.db.query(Movie).filter(Movie.director_id == director_id).all()
+        return
 
-        if connected_movies:
-          for movie in connected_movies:
+      connected_movies = self.db.query(Movie).filter(Movie.director_id == director_id).all()
 
-            # alle verbindungen zu 'movie'
-            to_movie_connected_data = self.db.query(UserToMovie).filter(UserToMovie.movie_id == movie.id).all()
+      if not connected_movies:
+        print(f"Es existieren keine Filme mehr, mit dem director '{existing_director.first_name} {existing_director.last_name}'")
 
-            # existieren verbindungen zu diesem film
-            if to_movie_connected_data:
+        return
 
-              # alle daten, die mit den zu löschenden filmen verbunden sind, löschen
-              for data in to_movie_connected_data:
-                self.db.delete(data)
-                self.db.commit()
+      else:
+        for movie in connected_movies:
+          #lösche alle verbindungen zu einem film
+          self.db.query(UserToMovie).filter(UserToMovie.movie_id == movie.id).delete()
 
-                print(f"die Zeile {data.user_id}, {data.movie_id}, wurde gelöscht")
+          print(f"Alle verbindungen zu {movie.title}, wurden gelöscht")
 
           # alle film verbindungen wurden gelöscht, jetzt werden alle filme gelöscht
-          for movie in connected_movies:
-            self.db.delete(movie)
-            self.db.commit()
+          self.db.delete(movie)
 
-            print(f"Der Film: {movie.title}, Director: {movie.director}, Rating: {movie.rating}, ID: {movie.id}, wurde gelöscht")
-
-
-        else:
-          print(f"Es existieren keine Filme mehr, mit dem director '{existing_director.first_name} {existing_director.last_name}'")
+          print(f"Der Film: {movie.title}, Director: {existing_director.first_name, existing_director.last_name}, Rating: {movie.rating}, ID: {movie.id}, wurde gelöscht")
 
         # alle filme mit dem director wurden gelöscht, jetzt wird der director gelöscht
         self.db.delete(existing_director)
-        self.db.commit()
 
         print(f"Der Director: '{existing_director.first_name} {existing_director.last_name}' ID: {existing_director.id}, wurde gelöscht")
 
+        # alle änderungen auf die datenbank übertragen
+        self.db.commit()
 
-      else:
-        print(f"Es existiert kein director mit der ID: {director_id}")
 
-    except Exception:
-      print(f"Fehler beim löschen des Directors mit der ID: {director_id}")
+    except Exception as e:
+
+      print(f"Fehler beim Löschen des Directors mit der ID: {director_id}: {e}")
+
+      self.db.rollback()
