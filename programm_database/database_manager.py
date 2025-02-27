@@ -184,7 +184,6 @@ class DatabaseManager:
       self.db.rollback()
 
 
-  # TODO metode überprüfen
   def delete_movie_for_user(self, user_id: int, movie_id: int):
     """
     Löscht die Verbindung zwischen einem Nutzer und einem Film.
