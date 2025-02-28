@@ -1,4 +1,4 @@
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.orm import Session
 from programm_database.models import User, Movie, Director, UserToMovie
 
@@ -26,6 +26,9 @@ class DatabaseManager:
     except NoResultFound as e:
       print(f"Kein User mit der ID: {user_id} gefunden: {e}")
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception:
       print(f"Fehler beim zugriff auf User mit der ID: {user_id}")
 
@@ -46,6 +49,9 @@ class DatabaseManager:
 
       # gibt user.id zurück, falls user existiert. Ansonsten wird None returned
       return user.id if user else None
+
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
 
     except Exception:
       print("Fehler beim abrufen der user_id")
@@ -69,6 +75,9 @@ class DatabaseManager:
       else:
         new_user = existing_user
         print(f"Es existiert bereits ein User mit diesem Namen: name:{new_user.name}, id: {new_user.id}")
+
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
 
     except Exception:
       print("fehler beim einfügen des neuen users")
@@ -97,6 +106,9 @@ class DatabaseManager:
       print(f"User mit der ID: {user_id}, wurde nicht gefunden: {e}")
       self.db.rollback()
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception as e:
       print(f"Fehler beim Löschen des Users: {e}")
       self.db.rollback()
@@ -107,13 +119,18 @@ class DatabaseManager:
       all_user = self.db.query(User).all()
       return all_user
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception:
       print("Fehler beim auflisten der User")
 
 
-  def list_movies_for_user(self, user_id: int):
+  def list_movies_for_user(self, user_id: int) -> tuple:
     """
     Listet alle Filme eines Nutzers basierend auf der user_id.
+    tuple aufbau:
+      (Movie_name: str, release_year: int, rating: float, director_first_name: str, director_last_name: str)
     """
     try:
       user_movies = (
@@ -133,6 +150,9 @@ class DatabaseManager:
 
       return user_movies
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception as e:
       print(f"Fehler beim Abrufen der Filme für Nutzer {user_id}: {e}")
       return []
@@ -143,6 +163,10 @@ class DatabaseManager:
     Fügt einen neuen Film für einen Nutzer hinzu und verknüpft ihn mit allen verinkten tables
     """
     try:
+      # wenn kein User mit der user_id vorhanden ist
+      if not self.get_user(user_id):
+        raise ValueError(f"User mit ID {user_id} existiert nicht.")
+
       # abfrage, ob director bereits in datenbank existiert
       existing_director = self.db.query(Director).filter(Director.first_name == director_first_name, Director.last_name == director_last_name).one_or_none()
 
@@ -178,6 +202,9 @@ class DatabaseManager:
 
     except ValueError as e:
       print(f"Director konnte nicht hinzugefügt werden: {e}")
+
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
 
     except Exception as e:
       print(f"Fehler beim Hinzufügen des Films für Nutzer {user_id}: {e}")
@@ -220,6 +247,9 @@ class DatabaseManager:
 
       return True
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception as e:
       print(f"Fehler beim Löschen des Films mit ID {movie_id} für Nutzer {user_id}: {e}")
       self.db.rollback()
@@ -245,11 +275,33 @@ class DatabaseManager:
       print(f"Das Rating für Nutzer {user_id} und Film {movie_id} wurde auf {new_rating} aktualisiert.")
       return True
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception as e:
       print(f"Fehler beim Aktualisieren des Ratings für Nutzer {user_id} und Film {movie_id}: {e}")
       self.db.rollback()
       return False
 
+
+  def get_movie_from_user(self, movie_id, user_id):
+    """
+    gibt einen Film zurück, mit dem spezifischen Rating des Users mit der ID: user_id
+    """
+    try:
+      existing_movie = self.db.query(Movie.title, UserToMovie.rating).join(UserToMovie, Movie.id == UserToMovie.movie_id).join(User, UserToMovie.user_id == User.id).filter(Movie.id == movie_id, User.id == user_id).first()
+
+      if not existing_movie:
+        print(f"Es existiert kein Film mit dieser ID: {user_id}")
+
+      return existing_movie
+
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
+    except Exception:
+      print("Fehler beim zugriff auf Filme")
+      self.db.rollback()
 
   def add_director(self, director_first_name: str, director_last_name: str):
     """
@@ -271,9 +323,12 @@ class DatabaseManager:
 
       return new_director
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception:
       print(f"Fehler beim hinzufügen des directors {director_first_name} {director_last_name}, in die datenbank.")
-
+      self.db.rollback()
 
   def get_director(self, director_id: int):
     """
@@ -289,9 +344,12 @@ class DatabaseManager:
         print(f"Es existiert kein Director mit der id: {director_id}")
         return None
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception:
       print(f"Es gab einen Fehler beim zugriff auf die datenbank")
-
+      self.db.rollback()
 
   def list_up_directors(self):
     try:
@@ -304,9 +362,12 @@ class DatabaseManager:
       else:
         return directors
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
+
     except Exception:
       print("Fehler beim zugriff auf Directoren")
-
+      self.db.rollback()
 
   def delete_director(self, director_id: int):
     """
@@ -347,6 +408,8 @@ class DatabaseManager:
         # alle änderungen auf die datenbank übertragen
         self.db.commit()
 
+    except SQLAlchemyError as e:
+      print(f"Datenbankfehler: {e}")
 
     except Exception as e:
 
