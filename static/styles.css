@@ -1,0 +1,104 @@
+Updated Flask Routes
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+/* styles.css */
+
+/* Allgemeine Seitengestaltung */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+h1, h2 {
+    color: #000;
+}
+
+main {
+    display: flex;
+    justify-content: space-around;
+    padding: 2rem;
+}
+
+/* Benutzer hinzufügen */
+#add-user, #select-user {
+    max-width: 400px;
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+
+
