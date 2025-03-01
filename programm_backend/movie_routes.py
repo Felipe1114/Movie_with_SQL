@@ -1,5 +1,8 @@
 from flask import Blueprint, jsonify, g, request
-from programm_api.movie_service import add_movie_from_api
+from werkzeug.exceptions import BadRequest
+from flask import UnsupportedMediaType
+
+from programm_api.movie_service import MovieService
 # Blueprint-Objekt für Movie-Routen
 movie_bp = Blueprint("movie_bp", __name__)
 
@@ -7,7 +10,8 @@ movie_bp = Blueprint("movie_bp", __name__)
 # 1. Alle Filme eines Nutzers abrufen
 @movie_bp.route("/user/<int:user_id>/movies", methods=["GET"])
 def get_movies_for_user(user_id):
-  user = g.db_manager.get_user(user_id)
+  db_manager = g.db_manager
+  user = db_manager.get_user(user_id)
 
   if not user:
     return jsonify({"error": "User nicht gefunden"}), 404
@@ -27,19 +31,30 @@ def add_movie_for_user(user_id):
     """
     Fügt einen neuen Film für einen Nutzer hinzu. Ruft Daten von der OMDb API ab.
     """
-    data = request.get_json()
-    title = data.get("title")
+    try:
+      # erhält daten aus dem HTML dokument
+      movie_service = g.movie_service
+      data = request.get_json()
+      title = data.get("title")
 
-    if not title:
-        return jsonify({"error": "Der Titel des Films fehlt."}), 400
+      # wenn kein Titel vorhanden
+      if not title:
+          return jsonify({"error": "Der Titel des Films fehlt."}), 400
 
-    # Film über den MovieService hinzufügen
-    result = add_movie_from_api(user_id=user_id, movie_title=title)
+      # Film über den MovieService hinzufügen
+      result = movie_service.add_movie_from_api(user_id=user_id, movie_title=title)
 
-    if "error" in result:
-        return jsonify(result), 400
+      if "error" in result:
+          return jsonify(result), 400
 
-    return jsonify(result), 201
+      return jsonify(result), 201
+
+    except BadRequest as e:
+      print(f"Fehlerhafter Respond: {e}")
+
+    except Exception:
+      print(f"Fehler beim hinzufügen eines films in 'add_movie_for_user'")
+
 # alter code
 """@movie_bp.route("/user/<int:user_id>/movies", methods=["POST"])
 def add_movie_for_user(user_id):
