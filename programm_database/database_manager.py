@@ -71,6 +71,7 @@ class DatabaseManager:
         self.db.refresh(new_user) # jetzt hat new_user auch eine id
 
         print(f"Neuer user hinzugefügt: name:{new_user.name}, id: {new_user.id}")
+        return new_user
 
       else:
         new_user = existing_user
