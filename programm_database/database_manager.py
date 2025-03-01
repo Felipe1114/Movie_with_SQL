@@ -102,6 +102,11 @@ class DatabaseManager:
 
         print(f"User mit dem namen: {removable_user.name}; und der ID: {removable_user.id}; wurde, mit all seien verknüpften daten, gelöscht")
 
+        return True
+
+      else:
+        return False
+
     except NoResultFound as e:
       print(f"User mit der ID: {user_id}, wurde nicht gefunden: {e}")
       self.db.rollback()
