@@ -1,6 +1,6 @@
 from programm_database.database_manager import DatabaseManager
-from omdb_api import OMDbAPI
-from validate_omdb_data import DataValidator
+from programm_api.omdb_api import OMDbAPI
+from programm_api.validate_omdb_data import DataValidator
 
 
 class MovieService:
