@@ -1,31 +1,36 @@
-from flask import Blueprint, jsonify, g, request
+from flask import Blueprint, jsonify, g, request, render_template
 from werkzeug.exceptions import BadRequest
-from flask import UnsupportedMediaType
 
-from programm_api.movie_service import MovieService
 # Blueprint-Objekt für Movie-Routen
 movie_bp = Blueprint("movie_bp", __name__)
 
-
-# 1. Alle Filme eines Nutzers abrufen
 @movie_bp.route("/user/<int:user_id>/movies", methods=["GET"])
 def get_movies_for_user(user_id):
-  db_manager = g.db_manager
-  user = db_manager.get_user(user_id)
+    try:
+        # Zugriff auf den DatabaseManager
+        db_manager = g.db_manager
 
-  if not user:
-    return jsonify({"error": "User nicht gefunden"}), 404
+        # Benutzer aus der Datenbank abrufen
+        user = db_manager.get_user(user_id)
+        if not user:
+            return jsonify({"error": "Benutzer nicht gefunden"}), 404
 
-  movies = [
-    {"title": m.movie.title, "rating": float(m.rating) if m.rating else None}
-    for m in user.movies
-  ]
+        # Filme des Benutzers abrufen
+        movies = [
+            {"id": m.movie.id, "title": m.movie.title, "rating": float(m.rating) if m.rating else None}
+            for m in user.movies
+        ]
 
-  return jsonify(movies), 200
+        # Template rendern und Benutzer- sowie Filmdaten übergeben
+        return render_template("user_template.html", user=user, movies=movies)
+
+    except Exception as e:
+        return jsonify({"error": f"Fehler beim Abrufen der Filme: {e}"}), 500
 
 
-#2. Einen neuen Film für einen Nutzer hinzufügen
-# TODO ist movie_service richtig implementiert?
+
+#2. Einen neuen Film für einen Nutzer hinzufügen. wenn der film dann hinzugefügt wurde,
+# soll er auch gleich mit den anderen filmen angezeigt werden
 @movie_bp.route("/user/<int:user_id>/movies", methods=["POST"])
 def add_movie_for_user(user_id):
     """
@@ -99,7 +104,7 @@ def update_movie_rating(user_id, movie_id):
 
 
 
-# 📌 4. Film eines Nutzers löschen
+# 4. Film eines Nutzers löschen
 @movie_bp.route("/user/<int:user_id>/movies/<int:movie_id>", methods=["DELETE"])
 def delete_movie_for_user(user_id, movie_id):
   try:
