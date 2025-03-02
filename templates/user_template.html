@@ -30,19 +30,21 @@
                     <tbody>
                         {% for movie in movies %}
                         <tr>
-                            <td>{{ movie.title }}</td>
-                            <td>{{ movie.rating }}</td>
+                            <td>{{ movie[0] }}({{ movie[1] }})</td> <!-- title(release_year) -->
+                            <td>Rating: {{ movie[2] }},</td> <!-- rating -->
+                            <td>Directed by: {{ movie[3] }} {{ movie[4] }}</td> <!-- director first_name director last_name -->
+
                             <td>
                                 <!-- Film löschen -->
-                                <form action="/api/users/{{ user.id }}/movies/{{ movie.id }}" method="POST" style="display:inline;">
+                                <form action="/user/{{ user.id }}/movies/{{ movie.id }}" method="POST" style="display:inline;">
                                     <input type="hidden" name="_method" value="DELETE">
                                     <button type="submit">Löschen</button>
                                 </form>
 
                                 <!-- Bewertung aktualisieren -->
-                                <form action="/api/users/{{ user.id }}/movies/{{ movie.id }}" method="POST" style="display:inline;">
+                                <form action="/user/{{ user.id }}/movies/{{ movie.id }}" method="POST" style="display:inline;">
                                     <input type="hidden" name="_method" value="PATCH">
-                                    <label for="rating-{{ movie.id }}">Bewertung:</label>
+                                    <label for="rating-{{ movie.id }}">Rating ändern:</label>
                                     <input type="number" id="rating-{{ movie.id }}" name="rating" min="0" max="10" step="0.1" required value="{{ movie.rating }}">
                                     <button type="submit">Update</button>
                                 </form>
@@ -59,7 +61,7 @@
         <!-- Neuen Film hinzufügen -->
         <section id="add-movie">
             <h2>Film hinzufügen</h2>
-            <form action="/api/users/{{ user.id }}/movies" method="POST">
+            <form action="/user/{{ user.id }}/movies" method="POST">
                 <label for="movie-title">Filmtitel:</label>
                 <input type="text" id="movie-title" name="title" required placeholder="Titel des Films">
                 <button type="submit">Hinzufügen</button>
