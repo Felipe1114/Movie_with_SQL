@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, g, request, render_template
+from flask import Blueprint, jsonify, g, request, render_template, redirect, url_for
 from werkzeug.exceptions import BadRequest
 
 # Blueprint-Objekt für Movie-Routen
@@ -15,72 +15,60 @@ def get_movies_for_user(user_id):
         if not user:
             return jsonify({"error": "Benutzer nicht gefunden"}), 404
 
-        # Filme des Benutzers abrufen
-        movies = [
-            {"id": m.movie.id, "title": m.movie.title, "rating": float(m.rating) if m.rating else None}
-            for m in user.movies
-        ]
+        movies = g.db_manager.list_movies_for_user(user_id)
+        # Filme des Benutzers abrufe
+        print([
+          {"id": movie[0], "title": movie[1], "rating": movie[2] if movie[2] else None}
+          for movie in movies
+        ])
+        # movies = [
+        #     {"id": m.movie.id, "title": m.movie.title, "rating": float(m.rating) if m.rating else None}
+        #     for m in user.movies
+        # ]
 
         # Template rendern und Benutzer- sowie Filmdaten übergeben
         return render_template("user_template.html", user=user, movies=movies)
+    except AttributeError as e:
+      return jsonify({"error": f"AttributeError:{e}"}), 500
 
     except Exception as e:
         return jsonify({"error": f"Fehler beim Abrufen der Filme: {e}"}), 500
-
 
 
 #2. Einen neuen Film für einen Nutzer hinzufügen. wenn der film dann hinzugefügt wurde,
 # soll er auch gleich mit den anderen filmen angezeigt werden
 @movie_bp.route("/user/<int:user_id>/movies", methods=["POST"])
 def add_movie_for_user(user_id):
-    """
-    Fügt einen neuen Film für einen Nutzer hinzu. Ruft Daten von der OMDb API ab.
-    """
     try:
-      # erhält daten aus dem HTML dokument
-      movie_service = g.movie_service
-      data = request.get_json()
-      title = data.get("title")
+        print(f"in 'movie_routes, 36', user_id = {user_id}")
+        # Prüfen, ob ein Titel übergeben wurde
+        title = request.form.get("title")
+        if not title:
+            raise BadRequest("Filmtitel fehlt.")
 
-      # wenn kein Titel vorhanden
-      if not title:
-          return jsonify({"error": "Der Titel des Films fehlt."}), 400
+        # Benutzer in der Datenbank überprüfen
+        db_manager = g.db_manager
+        print(f"in 'movie_routes, 44'; g.db_manager ist:{g.db_manager}")
 
-      # Film über den MovieService hinzufügen
-      result = movie_service.add_movie_from_api(user_id=user_id, movie_title=title)
+        user = db_manager.get_user(user_id)
+        print(f"{user}")
+        if not user:
+            return jsonify({"error": "Benutzer nicht gefunden"}), 404
 
-      if "error" in result:
-          return jsonify(result), 400
+        # Film zur Datenbank hinzufügen
+        movie_service = g.movie_service
+        new_movie = movie_service.add_movie_from_api(user_id, title)
 
-      return jsonify(result), 201
+        if not new_movie:
+            return jsonify({"error": "Film konnte nicht hinzugefügt werden."}), 500
+
+        # Erfolgreich: Weiterleitung zur aktualisierten Filmübersicht
+        return redirect(url_for("movie_bp.get_movies_for_user", user_id=user_id))
 
     except BadRequest as e:
-      print(f"Fehlerhafter Respond: {e}")
-
-    except Exception:
-      print(f"Fehler beim hinzufügen eines films in 'add_movie_for_user'")
-
-# alter code
-"""@movie_bp.route("/user/<int:user_id>/movies", methods=["POST"])
-def add_movie_for_user(user_id):
-  data = request.get_json()
-  title = data.get("title")
-  release_date = data.get("release_date")
-  director_first_name = data.get("director_first_name")
-  director_last_name = data.get("director_last_name")
-  rating = data.get("rating")
-
-  if not all([title, release_date, director_first_name, director_last_name]):
-    return jsonify({"error": "Fehlende Felder"}), 400
-
-  try:
-    g.db_manager.add_movie_for_user(
-      user_id, title, release_date, director_first_name, director_last_name, rating
-    )
-    return jsonify({"message": f"Film '{title}' hinzugefügt."}), 201
-
-  except Exception as e:
-    return jsonify({"error": str(e)}), 500"""
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Fehler beim Hinzufügen des Films: {e}"}), 500
 
 
 # 3. Film-Bewertung aktualisieren
