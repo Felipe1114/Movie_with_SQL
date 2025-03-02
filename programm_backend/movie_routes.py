@@ -18,7 +18,7 @@ def get_movies_for_user(user_id):
         movies = g.db_manager.list_movies_for_user(user_id)
         # Filme des Benutzers abrufe
         print([
-          {"id": movie[0], "title": movie[1], "rating": movie[2] if movie[2] else None}
+          {"title": movie[0], "year": movie[1], "rating": movie[2] if movie[2] else None}
           for movie in movies
         ])
         # movies = [
@@ -72,35 +72,46 @@ def add_movie_for_user(user_id):
 
 
 # 3. Film-Bewertung aktualisieren
-@movie_bp.route("/user/<int:user_id>/movies/<int:movie_id>", methods=["PATCH"])
+@movie_bp.route("/user/<int:user_id>/movies/<int:movie_id>", methods=["POST"])
 def update_movie_rating(user_id, movie_id):
-  data = request.get_json()
-  new_rating = data.get("rating")
+  try:
+    if request.form.get('_method') == 'PATCH':
 
-  if new_rating is None:
-    return jsonify({"error": "Rating fehlt"}), 400
+      new_rating = request.form.get("rating")
 
-  success = g.db_manager.update_movie_rating(user_id, movie_id, new_rating)
+      if new_rating is None:
+        return jsonify({"error": "Rating fehlt"}), 400
 
-  updated_movie = g.db_manager.get_movie_from_user(movie_id, user_id)
-  if not success:
-    return jsonify({"error": "Film oder User nicht gefunden"}), 404
+      success = g.db_manager.update_movie_rating(user_id, movie_id, new_rating)
 
-  # wewnn film aktualisert, alle filme wieder anzeigen lassen
-  return redirect(url_for("movie_bp.get_movies_for_user", user_id=user_id))
+      updated_movie = g.db_manager.get_movie_from_user(movie_id, user_id)
+      if not success:
+        return jsonify({"error": "Film oder User nicht gefunden"}), 404
+
+      # wewnn film aktualisert, alle filme wieder anzeigen lassen
+      return redirect(url_for("movie_bp.get_movies_for_user", user_id=user_id))
+
+  except Exception as e:
+    return jsonify({"error": str(e)}), 500
+
 
 
 
 # 4. Film eines Nutzers löschen
-@movie_bp.route("/user/<int:user_id>/movies/<int:movie_id>", methods=["DELETE"])
+@movie_bp.route("/user/<int:user_id>/delete_movies/<int:movie_id>", methods=["POST"])
 def delete_movie_for_user(user_id, movie_id):
   try:
-    success = g.db_manager.delete_movie_for_user(user_id, movie_id)
+    if request.form.get('_method') == 'DELETE':
 
-    if not success:
-      return jsonify({"error": "Film oder User nicht gefunden"}), 404
+      success = g.db_manager.delete_movie_for_user(user_id, movie_id)
 
-    return jsonify({"message": f"Film mit ID {movie_id} wurde gelöscht."}), 200
+      if not success:
+        return jsonify({"error": "Film oder User nicht gefunden"}), 404
+
+
+      # wewnn film gelöscht, alle filme wieder anzeigen lassen
+      return redirect(url_for("movie_bp.get_movies_for_user", user_id=user_id))
 
   except Exception as e:
     return jsonify({"error": str(e)}), 500
+
