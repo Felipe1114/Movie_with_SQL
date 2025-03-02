@@ -3,7 +3,6 @@ from werkzeug.exceptions import BadRequest
 
 # Blueprint-Objekt für Movie-Routen
 movie_bp = Blueprint("movie_bp", __name__)
-# TODO delete und update erhalten nicht die korreckten movie_id´s
 @movie_bp.route("/user/<int:user_id>/movies", methods=["GET"])
 def get_movies_for_user(user_id):
     try:
