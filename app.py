@@ -7,10 +7,10 @@ from programm_backend.movie_routes import movie_bp
 from programm_backend.user_routes import user_bp
 from programm_backend.main_route import main_bp
 from programm_api.movie_service import MovieService
+
 app = Flask(__name__)
-# TODO ist der movie_bp richtig registiert?
-# TODO routen für die movie seite des users richtig legen
-app.register_blueprint(movie_bp, url_prefix="/user/user_id")
+
+app.register_blueprint(movie_bp)
 app.register_blueprint(user_bp, url_prefix="/")
 app.register_blueprint(main_bp)
 
@@ -21,7 +21,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Datenbanktabellen erstellen (nur einmal beim Start)
 Base.metadata.create_all(engine)
 
-API_KEY = "http://www.omdbapi.com/?i=tt3896198&apikey=70e6d1f0"
+API_KEY = "70e6d1f0"
 # session mit 'g' bereitstellen
 def init_service():
     # initialisiert die datenbank und ihren zugriff
