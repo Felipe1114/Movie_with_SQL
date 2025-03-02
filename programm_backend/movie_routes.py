@@ -3,7 +3,7 @@ from werkzeug.exceptions import BadRequest
 
 # Blueprint-Objekt für Movie-Routen
 movie_bp = Blueprint("movie_bp", __name__)
-
+# TODO delete und update erhalten nicht die korreckten movie_id´s
 @movie_bp.route("/user/<int:user_id>/movies", methods=["GET"])
 def get_movies_for_user(user_id):
     try:
@@ -86,9 +86,8 @@ def update_movie_rating(user_id, movie_id):
   if not success:
     return jsonify({"error": "Film oder User nicht gefunden"}), 404
 
-  return jsonify({"message": f"Bewertung aktualisiert"}), 200
-  # warscheinlich ist hier ein fehler drin
-  # return jsonify({"message": f"Bewertung für Film: {updated_movie.title} aktualisiert"}), 200
+  # wewnn film aktualisert, alle filme wieder anzeigen lassen
+  return redirect(url_for("movie_bp.get_movies_for_user", user_id=user_id))
 
 
 
