@@ -139,8 +139,9 @@ class DatabaseManager:
       (Movie_name: str, release_year: int, rating: float, director_first_name: str, director_last_name: str)
     """
     try:
+      # wird dann als tuple ausgegeben und muss im html dokuemnt entsprechend enpackt werden
       user_movies = (
-        self.db.query(Movie.title, Movie.release_date, UserToMovie.rating, Director.first_name, Director.last_name)
+        self.db.query(Movie.title, Movie.release_date, UserToMovie.rating, Director.first_name, Director.last_name, Movie.id)
         .join(UserToMovie, Movie.id == UserToMovie.movie_id).join(Director, Movie.director_id == Director.id)
         .filter(UserToMovie.user_id == user_id)
         .all()
@@ -148,7 +149,7 @@ class DatabaseManager:
 
       if not user_movies:
         print(f"Keine Filme für Nutzer mit ID {user_id} gefunden.")
-        return []
+        return ()
 
       for index, movie in enumerate(user_movies):
         print("Folgende Filme wurden gefunden:")
