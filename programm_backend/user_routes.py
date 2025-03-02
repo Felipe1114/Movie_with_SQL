@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, g, request, render_template
+from flask import Blueprint, jsonify, g, request, render_template, redirect, url_for
 from sqlalchemy.exc import SQLAlchemyError
 user_bp = Blueprint("user_bp", __name__)
 
@@ -37,19 +37,6 @@ def create_user():
     except Exception as e:
         return jsonify({"error": f"Fehler beim Erstellen des Users: {e}"}), 500
 
-# # 3. Einzelnen User abrufen
-# @user_bp.route("/user/<int:user_id>", methods=["GET"])
-# def get_user(user_id):
-#     try:
-#         user = g.db_manager.get_user(user_id)
-#
-#         if not user:
-#             return jsonify({"error": f"Kein User mit der ID: {user_id}"}), 404
-#
-#         return jsonify({"user_name": user.name, "user_id": user.id}), 200
-#
-#     except Exception as e:
-#         return jsonify({"error": f"Fehler beim Zugriff auf User: {e}"}), 500
 
 # 4. User löschen (Korrektur: int statt str bei user_id)
 @user_bp.route("/user/<int:user_id>", methods=["DELETE"])
@@ -73,16 +60,26 @@ def loggin():
     try:
         # Hole die user_id aus den Query-Parametern
         user_id = request.args.get("user_id", type=int)
+        print(f"in 'loggin,76' user_id = {user_id}")
         if not user_id:
             return jsonify({"error": "Keine Benutzer-ID angegeben"}), 400
 
         # Hole den Benutzer aus der Datenbank
         user = g.db_manager.get_user(user_id)
+        print(f"In 'loggin,82'; nutzer ist: {user.name, user.id}")
         if not user:
             return jsonify({"error": "Benutzer nicht gefunden"}), 404
 
         # Rendere das Template und übergebe den Benutzer
-        return render_template("user_template.html", user=user)
+        # hie rmuss zu der route get_moives_for_user redirected werden
+        return redirect(url_for("movie_bp.get_movies_for_user", user_id=user_id))
+
 
     except Exception as e:
         return jsonify({"error": f"Fehler beim Laden der Benutzerseite: {e}"}), 500
+
+
+
+@user_bp.route("/user/logout", methods=["GET"])
+def loggout():
+    return redirect(url_for("main_route.index"))
