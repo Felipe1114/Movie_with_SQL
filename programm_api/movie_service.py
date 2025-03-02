@@ -16,9 +16,6 @@ class MovieService:
   def add_movie_from_api(self, user_id: int, movie_title: str):
     """
     Fügt einen Film aus der OMDb API für einen bestimmten Nutzer hinzu.
-    :param user_id: Die ID des Nutzers.
-    :param movie_title: Der Titel des Films.
-    :return: Ein Dictionary mit einer Erfolgsmeldung oder einer Fehlermeldung.
     """
     # Schritt 1: Filmdaten von der OMDb API abrufen
     movie_data = self.omdb_api.fetch_movie_data(movie_title)
