@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film-App - Benutzerübersicht</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Willkommen zur Film-App</h1>
+    </header>
+
+    <main>
+        <!-- Benutzer hinzufügen -->
+        <section id="add-user">
+            <h2>Neuen Benutzer erstellen</h2>
+            <form id="user-form" action="/" method="POST">
+                <label for="user-name">Benutzername:</label>
+                <input type="text" id="user-name" name="name" required>
+                <button type="submit">Benutzer erstellen</button>
+            </form>
+        </section>
+
+        <!-- Benutzer auswählen und weiterleiten -->
+        <section id="select-user">
+            <h2>Benutzer auswählen</h2>
+            <form id="user-select-form" action="/user" method="GET">
+                <label for="user-dropdown">Benutzer wählen:</label>
+                <select id="user-dropdown" name="user_id" required>
+                    {% for user in users %}
+                        <option value="{{ user.user_id }}">{{ user.user_name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Film-App</p>
+    </footer>
+</body>
+
+</html>

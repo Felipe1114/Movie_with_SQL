@@ -1,0 +1,99 @@
+/* styles.css */
+
+/* Allgemeine Seitengestaltung */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+h1, h2 {
+    color: #000;
+}
+
+main {
+    display: flex;
+    justify-content: space-around;
+    padding: 2rem;
+}
+
+/* Benutzer hinzufügen */
+#add-user, #select-user {
+    max-width: 400px;
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Tabelle für Filme */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 0.8rem;
+    text-align: left;
+}
+
+table th {
+    background-color: #f4f4f4;
+}
+
+/* Kleinere und weniger auffällige Buttons für Löschen und Update */
+form button[type="submit"] {
+    padding: 0.3rem 0.6rem; /* Kleinere Größe */
+    font-size: 0.8rem; /* Kleinere Schrift */
+    color: #555; /* Weniger auffällige Farbe */
+    background-color: #f9f9f9; /* Dezentes Grau */
+    border: 1px solid #ccc; /* Dezente Umrandung */
+    border-radius: 4px; /* Leichte Rundung */
+    cursor: pointer; /* Zeigt an, dass es klickbar ist */
+}
+
+/* Hover-Effekt für die kleinen Buttons */
+form button[type="submit"]:hover {
+    background-color: #eaeaea; /* Etwas dunkler beim Hover */
+}
+
+/* Spezifische Stile für den Löschen-Button */
+form button[type="submit"]:nth-child(1) {
+    color: #d9534f; /* Dezentes Rot für Löschen */
+}
+
+/* Spezifische Stile für den Update-Button */
+form button[type="submit"]:nth-child(2) {
+    color: #0275d8; /* Dezentes Blau für Update */
+}
+
+/* Eingabefelder für Rating ändern */
+form input[type="number"] {
+    width: auto; /* Passt die Breite an den Inhalt an */
+    padding: 0.3rem; /* Kleinere Polsterung */
+}
