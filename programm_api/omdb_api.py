@@ -3,17 +3,17 @@ import requests
 class OMDbAPI:
     def __init__(self, api_key: str):
         """
-        Initialisiert die OMDbAPI-Klasse mit einem API-Schlüssel.
-        :param api_key: Dein API-Schlüssel für die OMDb API.
+        Initialice the OMDb-api-class with the api-key
+        :param api_key: the api-key
         """
         self.api_key = api_key
         self.base_url = "http://www.omdbapi.com/"
 
     def fetch_movie_data(self, title: str):
         """
-        Ruft Filmdaten von der OMDb API basierend auf dem Titel ab.
-        :param title: Der Titel des Films.
-        :return: Ein Dictionary mit den Filmdaten oder None bei Fehlern.
+        calls movie data from the OMDb-api, based on movie titel.
+        :param title: movie title
+        :return: dictionary with movie datas || None if error
         """
         try:
             response = requests.get(self.base_url, params={"apikey": self.api_key, "t": title})
