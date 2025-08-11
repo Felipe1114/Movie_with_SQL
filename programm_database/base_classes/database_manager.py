@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 class DatabaseManager(ABC):
+	"""BaseClass for all database managers"""
 	
 	@abstractmethod
 	def get_user(self, user_id: int):
