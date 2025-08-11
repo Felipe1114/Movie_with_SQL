@@ -1,8 +1,9 @@
+from programm_database.base_classes.database_manager import DatabaseManager
 from sqlalchemy.exc import NoResultFound, SQLAlchemyError
 from sqlalchemy.orm import Session
 from programm_database.models import User, Movie, Director, UserToMovie
 
-class DatabaseManager:
+class SQLiteDatabaseManager(DatabaseManager):
   def __init__(self, db: Session):
     """
     initialices DatabaseManager via argument
