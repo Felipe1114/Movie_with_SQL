@@ -50,9 +50,9 @@ class DatabaseManager:
       )
 
       if not user:
-        print(f"keinen nutzer mit dem namen: {user_name} gefunden")
+        print(f"no user with name: {user_name} found")
 
-      # gibt user.id zurück, falls user existiert. Ansonsten wird None returned
+      # gives back user.id, if user exists; else return None
       return user.id if user else None
 
     except SQLAlchemyError as e:
@@ -69,7 +69,6 @@ class DatabaseManager:
     
     :param user_name: name for new user
     :return: new_user || existing_user
-    fügt einen neuen user in die datenbank ein
     """
     try:
       existing_user = self.db.query(User.name).filter(User.name == user_name).first()
@@ -100,7 +99,7 @@ class DatabaseManager:
 
   def delete_user(self, user_id: int):
     """
-    Deletes an user form database and all connected data
+    Deletes a user form database and all connected data
     """
     try:
       removable_user = self.db.query(User).filter(User.id == user_id).one()
@@ -190,7 +189,7 @@ class DatabaseManager:
     try:
       # if no user exists with this id
       if not self.get_user(user_id):
-        raise ValueError(f"User mit ID {user_id} existiert nicht.")
+        raise ValueError(f"User wiht id: {user_id} does not exist.")
 
       # does director exists in database?
       existing_director = self.db.query(Director).filter(Director.first_name == director_first_name, Director.last_name == director_last_name).one_or_none()
@@ -223,7 +222,7 @@ class DatabaseManager:
       self.db.add(user_to_movie)
       self.db.commit()
 
-      print(f"Movie '{new_movie.title}' was edded to user with ID {user_id}")
+      print(f"Movie '{new_movie.title}' was added to user with ID {user_id}")
 
     except ValueError as e:
       print(f"Director couldn´t be added: {e}")
@@ -278,7 +277,7 @@ class DatabaseManager:
       self.db.rollback()
     
     except Exception as e:
-      print(f"Fehler beim Löschen des Films mit ID {movie_id} für Nutzer {user_id}: {e}")
+      print(f"Error for deleting movie wiht id: {movie_id} for user with id: {user_id}: {e}")
       self.db.rollback()
       return False
 
@@ -356,7 +355,7 @@ class DatabaseManager:
       self.db.rollback()
 
     except Exception:
-      print(f"Fehler beim hinzufügen des directors {director_first_name} {director_last_name}, in die datenbank.")
+      print(f"Error for adding director: {director_first_name} {director_last_name} to database")
       self.db.rollback()
 
   def get_director(self, director_id: int):
