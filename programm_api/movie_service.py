@@ -1,10 +1,10 @@
-from programm_database.database_manager import DatabaseManager
+from programm_database.sqlite_database_manager import SQLiteDatabaseManager
 from programm_api.omdb_api import OMDbAPI
 from programm_api.validate_omdb_data import DataValidator
 
 
 class MovieService:
-	def __init__(self, db_manager: DatabaseManager, api_key: str):
+	def __init__(self, db_manager: SQLiteDatabaseManager, api_key: str):
 		"""
 		Initializes the MovieService with the DatabaseMangager and the OMDbApi-client.
 		:param db_manager: Instance from DatabaseManager
@@ -30,8 +30,6 @@ class MovieService:
 		# Step 2: validate data
 		release_year = DataValidator.validate_release_year(movie_data.get("Year", ""))
 		rating = DataValidator.validate_numeric_field(movie_data.get("imdbRating", ""), "IMDB Bewertung")
-
-		movie_poster = movie_data.get()
 		
 		director_name = movie_data.get("Director", "")
 		if not director_name or director_name == "N/A":

@@ -19,7 +19,7 @@ class OMDbAPI:
             response = requests.get(self.base_url, params={"apikey": self.api_key, "t": title})
             response.raise_for_status()  # Hebt HTTP-Fehler hervor
             data = response.json()
-
+            
             if data.get("Response") == "True":
                 return data
             else:
