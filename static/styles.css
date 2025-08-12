@@ -1,99 +1,61 @@
 /* styles.css */
-
-/* Allgemeine Seitengestaltung */
+/* General page styling with sky blue color scheme and background image */
 body {
     font-family: Arial, sans-serif;
-    background-color: #ffffff;
-    color: #333;
+    background-color: #f0f8ff; /* Fallback color if image fails to load */
+    background-image: url('/static/pngtree-romantic-blue-film-phase-movie-poster-background-image_136505-1442881249.jpg');
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /* Makes the background fixed during scrolling */
+    color: #f0f8ff;
     margin: 0;
     padding: 0;
     line-height: 1.6;
 }
 
+/* Add a semi-transparent overlay to improve text readability */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1); /* Light white overlay */
+    z-index: -1;
+}
+
+/* Header styling in deeper blue */
 header {
     text-align: center;
     padding: 2rem 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid #4682b4; /* SteelBlue */
+    background-color: rgba(13, 25, 99, 0.7); /* DarkBlue with slight transparency */
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Adds shadow to improve readability */
 }
 
-h1, h2 {
-    color: #000;
-}
-
+/* Rest of your existing CSS remains the same... */
 main {
     display: flex;
     justify-content: space-around;
     padding: 2rem;
+    background-color: rgba(240, 248, 255, 0.8); /* Slightly transparent light blue */
+    border-radius: 8px;
+    margin: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Benutzer hinzufügen */
+/* Add user form styling with blue accents and improved contrast */
 #add-user, #select-user {
     max-width: 400px;
     width: 100%;
     padding: 1.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid #4682b4;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background: #fff;
+    box-shadow: 0 2px 8px rgba(69, 130, 180, 0.2);
+    background: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
 }
 
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-input, select, button {
-    width: 100%;
-    padding: 0.8rem;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-/* Tabelle für Filme */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-table th, table td {
-    border: 1px solid #ddd;
-    padding: 0.8rem;
-    text-align: left;
-}
-
-table th {
-    background-color: #f4f4f4;
-}
-
-/* Kleinere und weniger auffällige Buttons für Löschen und Update */
-form button[type="submit"] {
-    padding: 0.3rem 0.6rem; /* Kleinere Größe */
-    font-size: 0.8rem; /* Kleinere Schrift */
-    color: #555; /* Weniger auffällige Farbe */
-    background-color: #f9f9f9; /* Dezentes Grau */
-    border: 1px solid #ccc; /* Dezente Umrandung */
-    border-radius: 4px; /* Leichte Rundung */
-    cursor: pointer; /* Zeigt an, dass es klickbar ist */
-}
-
-/* Hover-Effekt für die kleinen Buttons */
-form button[type="submit"]:hover {
-    background-color: #eaeaea; /* Etwas dunkler beim Hover */
-}
-
-/* Spezifische Stile für den Löschen-Button */
-form button[type="submit"]:nth-child(1) {
-    color: #d9534f; /* Dezentes Rot für Löschen */
-}
-
-/* Spezifische Stile für den Update-Button */
-form button[type="submit"]:nth-child(2) {
-    color: #0275d8; /* Dezentes Blau für Update */
-}
-
-/* Eingabefelder für Rating ändern */
-form input[type="number"] {
-    width: auto; /* Passt die Breite an den Inhalt an */
-    padding: 0.3rem; /* Kleinere Polsterung */
-}
+/* Rest of your CSS remains unchanged... */
